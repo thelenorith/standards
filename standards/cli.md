@@ -69,6 +69,47 @@ Source and destination directories are positional, not options.
 | No period at end | `help="source directory"` |
 | Under 60 characters | Keep it brief |
 
+## Default Values
+
+**Single Source of Truth:** Set default values in ONE place only.
+
+### For CLI Arguments
+
+Set defaults in `argparse` argument definition, **not** in function signatures:
+
+**Good:**
+```python
+# config.py
+DEFAULT_PATH_PATTERN = r".*[/\\]accept[/\\].*"
+
+# CLI
+parser.add_argument(
+    "--path-pattern",
+    default=config.DEFAULT_PATH_PATTERN,
+    help="regex pattern to match paths"
+)
+
+# Function - no default in signature
+def process(path_pattern: str = None):
+    # None means "use whatever caller passed"
+    pass
+```
+
+**Bad:**
+```python
+# CLI
+parser.add_argument("--path-pattern", default=r".*accept.*")
+
+# Function - DUPLICATE default
+def process(path_pattern: str = r".*accept.*"):  # Wrong!
+    pass
+```
+
+**Rationale:**
+- Prevents inconsistencies when defaults change
+- Clear separation: CLI layer sets policy, function layer implements logic
+- Function can be called programmatically with different defaults
+
 ## Exit Codes
 
 Define as module-level constants with `EXIT_` prefix:

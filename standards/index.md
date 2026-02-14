@@ -6,15 +6,24 @@ Standards for all ap-* astrophotography pipeline projects.
 
 | Standard | Description |
 |----------|-------------|
+| [Python Style](python-style.md) | Python coding style and best practices |
 | [ap-common Usage](ap-common-usage.md) | Use shared constants from ap-common |
 | [Naming](naming.md) | Project and package naming conventions |
 | [Project Structure](project-structure.md) | Directory layout and required files |
 | [README Format](readme-format.md) | README structure and content |
 | [Makefile](makefile.md) | Build targets and conventions |
 | [GitHub Workflows](github-workflows.md) | CI/CD pipeline configuration |
-| [Testing](testing.md) | Unit testing conventions |
+| [Testing](testing.md) | Unit testing conventions, TDD, and TEST_PLAN.md requirements |
 | [CLI](cli.md) | Command-line interface conventions |
 | [Logging & Progress](logging-progress.md) | Logging, progress indicators, and output |
+
+## Templates
+
+| Template | Description |
+|----------|-------------|
+| [TEST_PLAN.md](templates/TEST_PLAN.md) | Testing strategy documentation template |
+| [Makefile](templates/Makefile) | Standard Makefile for ap-* projects |
+| [workflows/](templates/workflows/) | GitHub Actions workflow templates |
 
 ## Guiding Principles
 

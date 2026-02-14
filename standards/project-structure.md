@@ -25,6 +25,7 @@ ap-<name>/
 ├── MANIFEST.in
 ├── Makefile
 ├── README.md
+├── TEST_PLAN.md
 └── pyproject.toml
 ```
 
@@ -34,6 +35,7 @@ ap-<name>/
 |------|---------|
 | `LICENSE` | Project license |
 | `README.md` | Project documentation |
+| `TEST_PLAN.md` | Testing strategy and rationale (see [template](templates/TEST_PLAN.md)) |
 | `MANIFEST.in` | sdist inclusion rules |
 | `Makefile` | Build/test automation |
 | `pyproject.toml` | Package configuration |

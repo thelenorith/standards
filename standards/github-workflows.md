@@ -4,247 +4,29 @@ Standard CI workflows for ap-* projects.
 
 ## Required Workflows
 
-| Workflow | File | Trigger |
-|----------|------|---------|
-| Test | `test.yml` | push, PR |
-| Lint | `lint.yml` | push, PR |
-| Typecheck | `typecheck.yml` | push, PR |
-| Format Check | `format.yml` | push, PR |
-| Coverage | `coverage.yml` | push, PR |
+| Workflow | Template | Description |
+|----------|----------|-------------|
+| Test | [test.yml](templates/workflows/test.yml) | Run pytest on Python 3.10-3.14 |
+| Lint | [lint.yml](templates/workflows/lint.yml) | Run flake8 linter |
+| Typecheck | [typecheck.yml](templates/workflows/typecheck.yml) | Run mypy type checker |
+| Format Check | [format.yml](templates/workflows/format.yml) | Verify black formatting |
+| Coverage | [coverage.yml](templates/workflows/coverage.yml) | Enforce 80% coverage threshold |
 
-## test.yml
+## Setup
 
-```yaml
-name: Test
+Copy all files from [templates/workflows/](templates/workflows/) to your project's `.github/workflows/` directory:
 
-on:
-  push:
-    branches: [main]
-  pull_request:
-    branches: [main]
-
-jobs:
-  test:
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        python-version: ["3.10", "3.11", "3.12", "3.13", "3.14"]
-
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v5
-        with:
-          python-version: ${{ matrix.python-version }}
-
-      - name: Install dependencies
-        run: make install-dev
-
-      - name: Run tests
-        run: make test
+```bash
+cp -r standards/templates/workflows/* .github/workflows/
 ```
 
-## lint.yml
-
-```yaml
-name: Lint
-
-on:
-  push:
-    branches: [main]
-  pull_request:
-    branches: [main]
-
-jobs:
-  lint:
-    runs-on: ubuntu-latest
-
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: "3.12"
-
-      - name: Install dependencies
-        run: make install-dev
-
-      - name: Run linter
-        run: make lint
-```
-
-## typecheck.yml
-
-```yaml
-name: Typecheck
-
-on:
-  push:
-    branches: [main]
-  pull_request:
-    branches: [main]
-
-jobs:
-  typecheck:
-    runs-on: ubuntu-latest
-
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: "3.12"
-
-      - name: Install dependencies
-        run: make install-dev
-
-      - name: Run type checker
-        run: make typecheck
-```
-
-## format.yml
-
-```yaml
-name: Format Check
-
-on:
-  push:
-    branches: [main]
-  pull_request:
-    branches: [main]
-
-jobs:
-  format:
-    runs-on: ubuntu-latest
-
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: "3.12"
-
-      - name: Install dependencies
-        run: make install-dev
-
-      - name: Check code formatting
-        run: |
-          # Run format to see if any changes are needed
-          make format
-
-          # Check if any files were modified
-          if ! git diff --exit-code; then
-            echo "❌ Code formatting changes required!"
-            echo "Please run 'make format' locally and commit the changes."
-            echo ""
-            echo "Files that need formatting:"
-            git diff --name-only
-            exit 1
-          fi
-
-          echo "✅ Code formatting is correct"
-```
-
-## coverage.yml
-
-```yaml
-name: Coverage Check
-
-on:
-  push:
-    branches: [main]
-  pull_request:
-    branches: [main]
-
-jobs:
-  coverage:
-    runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      pull-requests: write
-
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: "3.12"
-
-      - name: Install dependencies
-        run: make install-dev
-
-      - name: Generate coverage report
-        run: |
-          make coverage
-          python -m coverage report | tail -1 | awk '{print $$4}' | sed 's/%//' > .coverage-percentage || echo "0" > .coverage-percentage
-
-      - name: Extract coverage data and set badge info
-        if: always()
-        run: |
-          COVERAGE=$(cat .coverage-percentage || echo "0")
-          THRESHOLD=80
-          echo "COVERAGE=$COVERAGE" >> $GITHUB_ENV
-          echo "THRESHOLD=$THRESHOLD" >> $GITHUB_ENV
-
-          if [ "$(echo "$COVERAGE" | cut -d. -f1)" -lt "$THRESHOLD" ]; then
-            echo "COVERAGE_STATUS=failed" >> $GITHUB_ENV
-            echo "BADGE_COLOR=red" >> $GITHUB_ENV
-          else
-            echo "COVERAGE_STATUS=passed" >> $GITHUB_ENV
-            echo "BADGE_COLOR=green" >> $GITHUB_ENV
-          fi
-
-      - name: Comment on PR if coverage is below threshold
-        if: always() && github.event_name == 'pull_request' && env.COVERAGE_STATUS == 'failed'
-        uses: actions/github-script@v7
-        with:
-          script: |
-            const coverage = process.env.COVERAGE;
-            const threshold = process.env.THRESHOLD;
-            const badgeColor = process.env.BADGE_COLOR;
-
-            const comment = `## ❌ Code Coverage Check FAILED
-
-            ![Coverage Badge](https://img.shields.io/badge/coverage-${coverage}%25-${badgeColor})
-
-            **Current Coverage:** ${coverage}%
-            **Required Threshold:** ${threshold}%
-            **Status:** Coverage is below the required threshold
-
-            ⚠️ **This PR cannot be merged until coverage reaches at least ${threshold}%**
-
-            ---
-            *Coverage report generated by [coverage.py](https://coverage.readthedocs.io/)*`;
-
-            github.rest.issues.createComment({
-              issue_number: context.issue.number,
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              body: comment
-            });
-
-      - name: Verify coverage threshold (final pass/fail)
-        run: |
-          COVERAGE=$(cat .coverage-percentage || echo "0")
-          THRESHOLD=80
-          if [ "$(echo "$COVERAGE" | cut -d. -f1)" -lt "$THRESHOLD" ]; then
-            echo "❌ Coverage check failed: ${COVERAGE}% is below the required ${THRESHOLD}% threshold"
-            exit 1
-          else
-            echo "✅ Coverage check passed: ${COVERAGE}% meets the required ${THRESHOLD}% threshold"
-          fi
-```
+No modifications needed - workflows use Makefile targets which handle project-specific paths.
 
 ## Conventions
 
 ### Python versions
 
-Test on Python 3.10 through 3.14. Use 3.12 for single-version jobs (lint, format, coverage).
+Test on Python 3.10 through 3.14. Use 3.12 for single-version jobs (lint, format, typecheck, coverage).
 
 ### Actions versions
 
@@ -254,7 +36,7 @@ Use current major versions:
 
 ### Triggers
 
-Run on push to main and all PRs to main:
+All workflows run on push to main and all PRs to main:
 
 ```yaml
 on:
@@ -266,9 +48,11 @@ on:
 
 ### Use Makefile targets
 
-Workflows should call Makefile targets, not duplicate commands:
+Workflows call Makefile targets, not duplicate commands:
 
 ```yaml
 - name: Run tests
   run: make test
 ```
+
+This keeps CI configuration simple and ensures local `make test` matches CI behavior.
