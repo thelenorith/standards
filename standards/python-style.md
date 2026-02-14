@@ -44,14 +44,14 @@ check_calibration_status(directory=image_dir, source_dir=source_dir)
 **Optional parameters:** Must use named assignment
 ```python
 # WRONG: Positional optional parameters
-status = check_calibration_status(image_dir, source_dir, debug, allow_bias)
+status = check_calibration_status(image_dir, source_dir, debug, scale_darks)
 
 # CORRECT: Named optional parameters
 status = check_calibration_status(
     image_dir,
     source_dir,
     debug=debug,
-    allow_bias=allow_bias
+    scale_darks=scale_darks
 )
 ```
 

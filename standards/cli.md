@@ -57,6 +57,28 @@ See [Logging and Progress Standards](logging-progress.md) for implementation pat
 | `--no-<feature>` | `--no-overwrite`, `--no-accept` | Disable default behavior |
 | `--<qualifier>-dir` | `--blink-dir`, `--accept-dir` | Directory paths |
 
+## Boolean Flags
+
+**Preferred Pattern:** Use `argparse.BooleanOptionalAction` for boolean feature flags (Python 3.9+).
+
+```python
+parser.add_argument(
+    "--scale-dark",
+    action=argparse.BooleanOptionalAction,
+    default=False,
+    help="scale dark frames using bias compensation (allows shorter exposures). "
+    "Default: exact exposure match only",
+)
+```
+
+**When to use:**
+- Features that can be enabled or disabled
+- Behavior that should be explicitly controllable
+- Replacing simple `action="store_true"` flags where negation is useful
+
+**Example:**
+- `--scale-dark` - Enable bias-compensated dark frame scaling
+
 ## Positional Arguments
 
 Source and destination directories are positional, not options.
