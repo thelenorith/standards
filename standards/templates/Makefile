@@ -3,8 +3,8 @@
 
 .PHONY: install install-dev install-no-deps uninstall clean format lint typecheck test test-verbose coverage default
 
-# Use parent .venv if it exists (monorepo), otherwise local .venv
-VENV_DIR ?= $(if $(wildcard ../.venv/bin/python),../.venv,.venv)
+# Use shared ~/.venv/ap if it exists, otherwise local .venv
+VENV_DIR ?= $(if $(wildcard $(HOME)/.venv/ap/bin/python),$(HOME)/.venv/ap,.venv)
 PYTHON := $(VENV_DIR)/bin/python
 
 default: format lint typecheck test coverage
