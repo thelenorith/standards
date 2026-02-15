@@ -27,29 +27,28 @@ make default   # Same as above (explicit)
 | `test` | Run pytest |
 | `coverage` | Run pytest with coverage |
 
-## Monorepo Development
+## Shared Venv
 
-When working in ap-base, submodules auto-detect the shared venv at the monorepo root. See [Shared Virtual Environment](shared-venv.md) for the full standard.
+All ap-* projects share a single venv at `~/.venv/ap/`. See [Shared Virtual Environment](shared-venv.md) for the full standard.
 
 One-time setup:
 
 ```bash
-cd ap-base
-python3 -m venv .venv
+python3 -m venv ~/.venv/ap
 ```
 
-Then cd into submodules and run make as usual:
+Then cd into any repo and run make as usual:
 
 ```bash
 cd ap-common
-make install-dev        # Detects ../.venv, installs there
+make install-dev        # Detects ~/.venv/ap, installs there
 
 cd ../ap-cull-light
 make install-dev        # Same shared venv
-make test               # Uses ../.venv automatically
+make test               # Uses ~/.venv/ap automatically
 ```
 
-The auto-detection uses `$(wildcard ../.venv/bin/python)` in each submodule Makefile. No orchestrator Makefile or extra flags needed.
+The auto-detection uses `$(wildcard $(HOME)/.venv/ap/bin/python)` in each Makefile. If the shared venv does not exist (CI, new machine), it falls back to a local `.venv`.
 
 The `install-no-deps` target is still available for cases where you need to install a package without pulling its dependencies from the network.
 
@@ -61,15 +60,15 @@ Copy [templates/Makefile](templates/Makefile) to your project and replace `<name
 
 ### VENV_DIR variable
 
-`VENV_DIR` auto-detects the monorepo shared venv or falls back to a local one:
+`VENV_DIR` auto-detects the shared venv at `~/.venv/ap` or falls back to a local one:
 
 ```makefile
-VENV_DIR ?= $(if $(wildcard ../.venv/bin/python),../.venv,.venv)
+VENV_DIR ?= $(if $(wildcard $(HOME)/.venv/ap/bin/python),$(HOME)/.venv/ap,.venv)
 ```
 
-- **Monorepo**: `../.venv/bin/python` exists, so `VENV_DIR` resolves to `../.venv`
-- **Standalone**: no parent venv, so `VENV_DIR` resolves to `.venv`
-- **Override**: `make VENV_DIR=/some/path test` always works
+- **Shared venv exists**: `VENV_DIR` resolves to `~/.venv/ap`
+- **No shared venv**: `VENV_DIR` resolves to `.venv` (local)
+- **Override**: `make VENV_DIR=.venv test` always works
 
 See [Shared Virtual Environment](shared-venv.md) for full details.
 
