@@ -17,6 +17,7 @@ Standards for all ap-* astrophotography pipeline projects.
 | [CLI](cli.md) | Command-line interface conventions |
 | [CLI Testing](cli-testing.md) | CLI/main() function testing to prevent argument bugs |
 | [Logging & Progress](logging-progress.md) | Logging, progress indicators, and output |
+| [Shared Virtual Environment](shared-venv.md) | Venv setup for standalone and monorepo development |
 
 ## Templates
 
