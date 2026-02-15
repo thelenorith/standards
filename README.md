@@ -20,7 +20,7 @@ See [standards/index.md](standards/index.md) for complete catalog with guiding p
 | Area | Standards |
 |------|-----------|
 | Code | [Naming](standards/naming.md), [Code Style](standards/code-style.md), [Project Structure](standards/project-structure.md), [Testing](standards/testing.md) |
-| Build | [Makefile](standards/makefile.md), [GitHub Workflows](standards/github-workflows.md), [Releases](standards/releases.md) |
+| Build | [Makefile](standards/makefile.md), [GitHub Workflows](standards/github-workflows.md), [Releases](standards/releases.md), [Shared Venv](standards/shared-venv.md) |
 | Docs | [README Format](standards/readme-format.md) |
 | CLI | [CLI](standards/cli.md), [Logging & Progress](standards/logging-progress.md) |
 | Services | [Services](standards/services.md), [API Design](standards/api-design.md) |

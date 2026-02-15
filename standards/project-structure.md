@@ -6,6 +6,7 @@ Standard directory layout for ap-* Python projects.
 
 ```
 ap-<name>/
+├── .venv/                  # Virtual environment (created by make, git-ignored)
 ├── ap_<name>/              # Package directory (underscores)
 │   ├── __init__.py
 │   ├── __main__.py         # Entry point for python -m
@@ -28,6 +29,8 @@ ap-<name>/
 ├── TEST_PLAN.md
 └── pyproject.toml
 ```
+
+The `.venv/` directory is created automatically by `make install-dev` and must be git-ignored. When working in the ap-base monorepo, submodules share a single venv at the monorepo root instead. See [Shared Virtual Environment](shared-venv.md).
 
 ## Required Files
 

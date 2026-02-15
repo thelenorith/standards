@@ -29,22 +29,22 @@ make default   # Same as above (explicit)
 
 ## Monorepo Development
 
-When working in ap-base with local changes to dependencies (e.g., modifying ap-common while working on ap-copy-master-to-blink):
+The recommended approach is to use a shared venv at the ap-base root. See [Shared Virtual Environment](shared-venv.md) for the full standard.
 
 ```bash
-# Install ap-common with dependencies
-cd ap-common
-make install-dev
-
-# Install dependent tool WITHOUT dependencies (preserves local ap-common)
-cd ../ap-copy-master-to-blink
-make install-no-deps
-
-# Run tests (uses local ap-common)
-make test
+cd ap-base
+make install-all    # Creates .venv/, installs all submodules editable
 ```
 
-The `install-no-deps` target uses `pip install -e . --no-deps` to skip dependency installation, preventing pip from fetching ap-common from PyPI and overwriting your local editable install.
+All submodules share `ap-base/.venv/`. Editable installs mean changes to any submodule source (e.g., ap-common) are immediately visible to all others. No `install-no-deps` workarounds needed.
+
+To run checks in a single submodule:
+
+```bash
+make -C ap-cull-light VENV_DIR=$(pwd)/.venv default
+```
+
+The `install-no-deps` target is still available for cases where you need to install a package without pulling its dependencies from the network.
 
 ## Template
 
@@ -52,19 +52,43 @@ Copy [templates/Makefile](templates/Makefile) to your project and replace `<name
 
 ## Conventions
 
-### PYTHON variable
+### VENV_DIR variable
 
-Use `$(PYTHON)` instead of hardcoding `python` or `python3`:
+The venv directory is configurable via `VENV_DIR`. Use `?=` so the monorepo can override it:
 
 ```makefile
-PYTHON := python
+VENV_DIR ?= .venv
+```
+
+When standalone, this defaults to `.venv` in the project directory. When called from ap-base, the monorepo passes `VENV_DIR=$(CURDIR)/.venv` so all submodules share one venv.
+
+See [Shared Virtual Environment](shared-venv.md) for full details.
+
+### PYTHON variable
+
+`PYTHON` points to the venv's Python binary. Do not hardcode `python` or `python3` in targets:
+
+```makefile
+PYTHON := $(VENV_DIR)/bin/python
+```
+
+### Venv creation target
+
+The venv is created automatically as a Make prerequisite. Make only runs this if the file does not exist:
+
+```makefile
+$(VENV_DIR)/bin/python:
+	python3 -m venv $(VENV_DIR)
 ```
 
 ### Dependencies
 
-Targets that need the package installed should depend on `install-dev`:
+Targets that need the package installed should depend on `install-dev`, which itself depends on the venv existing:
 
 ```makefile
+install-dev: $(VENV_DIR)/bin/python
+	$(PYTHON) -m pip install -e ".[dev]"
+
 format: install-dev
 	$(PYTHON) -m black ap_<name> tests
 ```

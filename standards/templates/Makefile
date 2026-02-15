@@ -3,17 +3,21 @@
 
 .PHONY: install install-dev install-no-deps uninstall clean format lint typecheck test test-verbose coverage default
 
-PYTHON := python
+VENV_DIR ?= .venv
+PYTHON := $(VENV_DIR)/bin/python
 
 default: format lint typecheck test coverage
 
-install:
+$(VENV_DIR)/bin/python:
+	python3 -m venv $(VENV_DIR)
+
+install: $(VENV_DIR)/bin/python
 	$(PYTHON) -m pip install .
 
-install-dev:
+install-dev: $(VENV_DIR)/bin/python
 	$(PYTHON) -m pip install -e ".[dev]"
 
-install-no-deps:
+install-no-deps: $(VENV_DIR)/bin/python
 	$(PYTHON) -m pip install -e . --no-deps
 
 uninstall:
