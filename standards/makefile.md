@@ -29,20 +29,27 @@ make default   # Same as above (explicit)
 
 ## Monorepo Development
 
-The recommended approach is to use a shared venv at the ap-base root. See [Shared Virtual Environment](shared-venv.md) for the full standard.
+When working in ap-base, submodules auto-detect the shared venv at the monorepo root. See [Shared Virtual Environment](shared-venv.md) for the full standard.
+
+One-time setup:
 
 ```bash
 cd ap-base
-make install-all    # Creates .venv/, installs all submodules editable
+python3 -m venv .venv
 ```
 
-All submodules share `ap-base/.venv/`. Editable installs mean changes to any submodule source (e.g., ap-common) are immediately visible to all others. No `install-no-deps` workarounds needed.
-
-To run checks in a single submodule:
+Then cd into submodules and run make as usual:
 
 ```bash
-make -C ap-cull-light VENV_DIR=$(pwd)/.venv default
+cd ap-common
+make install-dev        # Detects ../.venv, installs there
+
+cd ../ap-cull-light
+make install-dev        # Same shared venv
+make test               # Uses ../.venv automatically
 ```
+
+The auto-detection uses `$(wildcard ../.venv/bin/python)` in each submodule Makefile. No orchestrator Makefile or extra flags needed.
 
 The `install-no-deps` target is still available for cases where you need to install a package without pulling its dependencies from the network.
 
@@ -54,13 +61,15 @@ Copy [templates/Makefile](templates/Makefile) to your project and replace `<name
 
 ### VENV_DIR variable
 
-The venv directory is configurable via `VENV_DIR`. Use `?=` so the monorepo can override it:
+`VENV_DIR` auto-detects the monorepo shared venv or falls back to a local one:
 
 ```makefile
-VENV_DIR ?= .venv
+VENV_DIR ?= $(if $(wildcard ../.venv/bin/python),../.venv,.venv)
 ```
 
-When standalone, this defaults to `.venv` in the project directory. When called from ap-base, the monorepo passes `VENV_DIR=$(CURDIR)/.venv` so all submodules share one venv.
+- **Monorepo**: `../.venv/bin/python` exists, so `VENV_DIR` resolves to `../.venv`
+- **Standalone**: no parent venv, so `VENV_DIR` resolves to `.venv`
+- **Override**: `make VENV_DIR=/some/path test` always works
 
 See [Shared Virtual Environment](shared-venv.md) for full details.
 
