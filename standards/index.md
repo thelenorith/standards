@@ -16,6 +16,7 @@ Standards for all ap-* astrophotography pipeline projects.
 | [Testing](testing.md) | Unit testing conventions, TDD, and TEST_PLAN.md requirements |
 | [CLI](cli.md) | Command-line interface conventions |
 | [CLI Testing](cli-testing.md) | CLI/main() function testing to prevent argument bugs |
+| [Service API](service-api.md) | Programmatic service interfaces for UI and external callers |
 | [Logging & Progress](logging-progress.md) | Logging, progress indicators, and output |
 
 ## Templates
