@@ -3,16 +3,19 @@
 
 .PHONY: install install-dev install-no-deps uninstall clean format lint typecheck test test-verbose coverage default
 
+# Normalize HOME to forward slashes (no-op on Unix, fixes Windows backslashes)
+HOME_DIR := $(subst \,/,$(HOME))
+
 # Use shared ~/.venv/ap if it exists, otherwise local .venv
 ifeq ($(OS),Windows_NT)
-    VENV_DIR ?= $(if $(wildcard $(HOME)/.venv/ap/Scripts/python.exe),$(HOME)/.venv/ap,.venv)
+    VENV_DIR ?= $(if $(wildcard $(HOME_DIR)/.venv/ap/Scripts/python.exe),$(HOME_DIR)/.venv/ap,.venv)
     PYTHON := $(VENV_DIR)/Scripts/python.exe
 else
-    VENV_DIR ?= $(if $(wildcard $(HOME)/.venv/ap/bin/python),$(HOME)/.venv/ap,.venv)
+    VENV_DIR ?= $(if $(wildcard $(HOME_DIR)/.venv/ap/bin/python),$(HOME_DIR)/.venv/ap,.venv)
     PYTHON := $(VENV_DIR)/bin/python
 endif
 
-$(info 🐍 venv: $(VENV_DIR))
+$(info venv: $(VENV_DIR))
 
 default: format lint typecheck test coverage
 

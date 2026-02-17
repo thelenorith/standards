@@ -20,16 +20,19 @@ All ap-* projects share a single venv at `~/.venv/ap/`. This location is:
 Each Makefile auto-detects whether the shared venv exists, with platform-appropriate paths:
 
 ```makefile
+# Normalize HOME to forward slashes (no-op on Unix, fixes Windows backslashes)
+HOME_DIR := $(subst \,/,$(HOME))
+
 ifeq ($(OS),Windows_NT)
-    VENV_DIR ?= $(if $(wildcard $(HOME)/.venv/ap/Scripts/python.exe),$(HOME)/.venv/ap,.venv)
+    VENV_DIR ?= $(if $(wildcard $(HOME_DIR)/.venv/ap/Scripts/python.exe),$(HOME_DIR)/.venv/ap,.venv)
     PYTHON := $(VENV_DIR)/Scripts/python.exe
 else
-    VENV_DIR ?= $(if $(wildcard $(HOME)/.venv/ap/bin/python),$(HOME)/.venv/ap,.venv)
+    VENV_DIR ?= $(if $(wildcard $(HOME_DIR)/.venv/ap/bin/python),$(HOME_DIR)/.venv/ap,.venv)
     PYTHON := $(VENV_DIR)/bin/python
 endif
 ```
 
-`$(HOME)` is used instead of `~` because Make does not expand tilde in variable assignments. `$(OS)` is set to `Windows_NT` by Windows itself, so the conditional works without any configuration.
+`$(HOME)` is normalized to forward slashes via `$(subst \,/,$(HOME))` because on Windows `$(HOME)` contains backslashes (e.g. `C:\Users\you`) which the shell interprets as escape characters. Tilde is not used because Make does not expand it in variable assignments. `$(OS)` is set to `Windows_NT` by Windows itself, so the conditional works without any configuration.
 
 - If the shared venv python exists: `VENV_DIR` resolves to `~/.venv/ap`
 - If it does not exist: `VENV_DIR` falls back to `.venv` (local)
@@ -97,16 +100,19 @@ This keeps everything working out of the box with no manual setup required.
 The full pattern used in [templates/Makefile](templates/Makefile):
 
 ```makefile
+# Normalize HOME to forward slashes (no-op on Unix, fixes Windows backslashes)
+HOME_DIR := $(subst \,/,$(HOME))
+
 # Use shared ~/.venv/ap if it exists, otherwise local .venv
 ifeq ($(OS),Windows_NT)
-    VENV_DIR ?= $(if $(wildcard $(HOME)/.venv/ap/Scripts/python.exe),$(HOME)/.venv/ap,.venv)
+    VENV_DIR ?= $(if $(wildcard $(HOME_DIR)/.venv/ap/Scripts/python.exe),$(HOME_DIR)/.venv/ap,.venv)
     PYTHON := $(VENV_DIR)/Scripts/python.exe
 else
-    VENV_DIR ?= $(if $(wildcard $(HOME)/.venv/ap/bin/python),$(HOME)/.venv/ap,.venv)
+    VENV_DIR ?= $(if $(wildcard $(HOME_DIR)/.venv/ap/bin/python),$(HOME_DIR)/.venv/ap,.venv)
     PYTHON := $(VENV_DIR)/bin/python
 endif
 
-$(info 🐍 venv: $(VENV_DIR))
+$(info venv: $(VENV_DIR))
 
 $(PYTHON):
 	python3 -m venv $(VENV_DIR)
@@ -119,7 +125,7 @@ Key details:
 
 - **Auto-detection**: The `$(wildcard)` check is evaluated at Makefile parse time. If the shared venv python exists, `VENV_DIR` resolves to the shared venv.
 - **Windows support**: `$(OS)` is set to `Windows_NT` by Windows itself; venv layout uses `Scripts/python.exe` instead of `bin/python`.
-- **Venv indicator**: `$(info 🐍 venv: $(VENV_DIR))` prints which venv is in use on every Make invocation, so you always know at a glance whether you are using the shared or local venv.
+- **Venv indicator**: `$(info venv: $(VENV_DIR))` prints which venv is in use on every Make invocation, so you always know at a glance whether you are using the shared or local venv.
 - **Venv creation**: The `$(PYTHON)` target only fires if the file does not exist. When using the shared venv, this is a no-op.
 - **Override**: `VENV_DIR ?=` means you can always force a specific path: `make VENV_DIR=.venv test` to use a local venv instead.
 
@@ -133,3 +139,4 @@ GitHub Actions workflows do not need changes. In CI there is no `~/.venv/ap`, so
 - **Do not use `VIRTUAL_ENV` environment variable** to detect venvs. Use the `VENV_DIR` Makefile variable for explicit control.
 - **Do not install into system Python** - The Makefile template always installs into a venv.
 - **Do not use `~` in Makefiles** - Use `$(HOME)`. Make does not expand tilde in variable assignments.
+- **Do not use `$(HOME)` directly in paths** - Use `$(subst \,/,$(HOME))` to normalize backslashes. On Windows, `$(HOME)` contains backslashes that the shell interprets as escape characters.

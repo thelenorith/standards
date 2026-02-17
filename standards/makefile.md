@@ -63,14 +63,18 @@ Copy [templates/Makefile](templates/Makefile) to your project and replace `<name
 `VENV_DIR` and `PYTHON` auto-detect the shared venv at `~/.venv/ap` or fall back to a local one, with platform-appropriate paths:
 
 ```makefile
+HOME_DIR := $(subst \,/,$(HOME))
+
 ifeq ($(OS),Windows_NT)
-    VENV_DIR ?= $(if $(wildcard $(HOME)/.venv/ap/Scripts/python.exe),$(HOME)/.venv/ap,.venv)
+    VENV_DIR ?= $(if $(wildcard $(HOME_DIR)/.venv/ap/Scripts/python.exe),$(HOME_DIR)/.venv/ap,.venv)
     PYTHON := $(VENV_DIR)/Scripts/python.exe
 else
-    VENV_DIR ?= $(if $(wildcard $(HOME)/.venv/ap/bin/python),$(HOME)/.venv/ap,.venv)
+    VENV_DIR ?= $(if $(wildcard $(HOME_DIR)/.venv/ap/bin/python),$(HOME_DIR)/.venv/ap,.venv)
     PYTHON := $(VENV_DIR)/bin/python
 endif
 ```
+
+`HOME_DIR` normalizes backslashes to forward slashes so paths work in both Windows shells and Unix.
 
 - **Shared venv exists**: `VENV_DIR` resolves to `~/.venv/ap`
 - **No shared venv**: `VENV_DIR` resolves to `.venv` (local)
