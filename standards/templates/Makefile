@@ -12,6 +12,8 @@ else
     PYTHON := $(VENV_DIR)/bin/python
 endif
 
+$(info 🐍 venv: $(VENV_DIR))
+
 default: format lint typecheck test coverage
 
 $(PYTHON):
