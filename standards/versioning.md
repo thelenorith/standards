@@ -26,7 +26,7 @@ A breaking change is anything that causes existing usage to fail or produce diff
 | Remove a CLI argument | Yes | Existing scripts and automation break |
 | Change a CLI argument's default value | Yes | Existing behavior changes silently |
 | Change CLI exit code meanings | Yes | Scripting logic breaks |
-| Change output format (stdout) | Yes | Downstream consumers break |
+| Change output format (stdout/stderr) | No | Output is not a stable contract |
 | Add a new required CLI argument | Yes | Existing invocations fail |
 | Add a new optional CLI argument | No | Existing invocations still work |
 | Add a new feature behind a flag | No | No change to existing behavior |
@@ -56,7 +56,6 @@ Increment major version when the CLI contract changes in an incompatible way.
 - `--blink-dir` renamed to `--blink-path`
 - `--no-overwrite` removed
 - Default behavior of `--scale-dark` changed from off to on
-- Output format changed from tab-separated to JSON
 
 ### Minor (`Y`) - New Features
 
