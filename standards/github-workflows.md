@@ -36,15 +36,17 @@ Use current major versions:
 
 ### Triggers
 
-All workflows run on push to main and all PRs to main:
+All workflows run on pushes to `devel` and `stable-*` branches, and on PRs targeting those branches. See [Branching Strategy](branching.md) for the branch model.
 
 ```yaml
 on:
   push:
-    branches: [main]
+    branches: [devel, stable-*]
   pull_request:
-    branches: [main]
+    branches: [devel, stable-*]
 ```
+
+There is no `main` branch. The `devel` branch is the default branch and primary integration target. The `stable-*` pattern matches all release branches (e.g., `stable-1.2`, `stable-2.0`).
 
 ### Use Makefile targets
 

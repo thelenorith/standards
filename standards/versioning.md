@@ -1,6 +1,6 @@
 # Versioning Standards
 
-Semantic versioning conventions for ap-* projects.
+Semantic versioning conventions for ap-* projects. See [Branching Strategy](branching.md) for how versions map to branches.
 
 ## Version Format
 
@@ -80,10 +80,43 @@ Increment patch version for fixes that correct behavior to match documented inte
 - Documentation corrections
 - Performance improvements with no behavior change
 
+## Lockstep Versioning
+
+All ap-* tools share the same `X.Y` version on every release. When a `stable-X.Y` branch is cut from `devel`, all tools are released at version `X.Y.0` together.
+
+| Aspect | Rule |
+|--------|------|
+| Major/minor version | Same across all ap-* tools at release time |
+| Patch version | Independent per tool (hotfixes may not apply to all tools) |
+| Version source of truth | Git tags on the `stable-X.Y` branch |
+
+### Why Lockstep
+
+- **No compatibility matrix** — users install all tools at the same X.Y and they work together
+- **Simple integration testing** — test all tools at HEAD of the same branch
+- **Simple packaging** — one version number for the entire suite
+- **Clear user communication** — "upgrade to 1.3" means upgrade everything to 1.3
+
+Tools that have no changes in a release still receive the version bump. This is intentional overhead in exchange for simpler compatibility, testing, and user experience.
+
+## Version-Branch Relationship
+
+Versions are tied to the [branching model](branching.md):
+
+| Branch | Version state |
+|--------|--------------|
+| `devel` | Next unreleased version (development) |
+| `stable-X.Y` | Released `X.Y.Z` (patch increments for hotfixes) |
+
+- The `X.Y` in `stable-X.Y` is determined at release time based on what changed in `devel` since the last release
+- Patch versions only appear on stable branches via hotfixes
+- Tags (`vX.Y.Z`) are only created on stable branches, never on `devel`
+
 ## Guidelines
 
-1. **CLI is the public API** - Version the CLI contract, not internal code
-2. **When in doubt, bump major** - A cautious major bump is better than a surprise break
-3. **Reset lower components** - Bumping minor resets patch to 0; bumping major resets minor and patch to 0
-4. **Tag releases** - Use git tags matching `vX.Y.Z` (e.g., `v1.2.0`)
-5. **Start at 0.1.0** - New projects start at `0.1.0`; the `0.x` range signals pre-stable development where breaking changes may occur in minor releases
+1. **CLI is the public API** — version the CLI contract, not internal code
+2. **When in doubt, bump major** — a cautious major bump is better than a surprise break
+3. **Reset lower components** — bumping minor resets patch to 0; bumping major resets minor and patch to 0
+4. **Tag releases** — use git tags matching `vX.Y.Z` (e.g., `v1.2.0`) on `stable-X.Y` branches
+5. **Start at 0.1.0** — new projects start at `0.1.0`; the `0.x` range signals pre-stable development where breaking changes may occur in minor releases
+6. **Lockstep release** — all ap-* tools share the same `X.Y` at release time; see [Branching Strategy](branching.md) for the release workflow

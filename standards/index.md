@@ -18,7 +18,9 @@ Standards for all ap-* astrophotography pipeline projects.
 | [CLI Testing](cli-testing.md) | CLI/main() function testing to prevent argument bugs |
 | [Logging & Progress](logging-progress.md) | Logging, progress indicators, and output |
 | [Shared Virtual Environment](shared-venv.md) | Venv setup for standalone and monorepo development |
-| [Versioning](versioning.md) | Semantic versioning and release conventions |
+| [Versioning](versioning.md) | Semantic versioning, lockstep releases, and version conventions |
+| [Branching Strategy](branching.md) | Branch model using devel and stable-X.Y branches |
+| [Integration Testing](integration-testing.md) | Cross-project testing for the ap-* tool suite |
 
 ## Templates
 

@@ -55,9 +55,9 @@ All projects must include standard boilerplate linking back to ap-base for compr
 
 This tool is part of the astrophotography pipeline. For comprehensive documentation including workflow guides and integration with other tools, see:
 
-- **[Pipeline Overview](https://github.com/jewzaam/ap-base/blob/main/docs/index.md)** - Full pipeline documentation
-- **[Workflow Guide](https://github.com/jewzaam/ap-base/blob/main/docs/workflow.md)** - Detailed workflow with diagrams
-- **[ap-<name> Guide](https://github.com/jewzaam/ap-base/blob/main/docs/tools/ap-<name>.md)** - Detailed usage guide for this tool
+- **[Pipeline Overview](https://github.com/jewzaam/ap-base/blob/devel/docs/index.md)** - Full pipeline documentation
+- **[Workflow Guide](https://github.com/jewzaam/ap-base/blob/devel/docs/workflow.md)** - Detailed workflow with diagrams
+- **[ap-<name> Guide](https://github.com/jewzaam/ap-base/blob/devel/docs/tools/ap-<name>.md)** - Detailed usage guide for this tool
 ```
 
 Replace `<name>` with the actual project name (e.g., `ap-common`, `ap-cull-light`).

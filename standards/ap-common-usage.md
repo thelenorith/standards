@@ -23,7 +23,7 @@ dependencies = [
 
 ## Available Constants
 
-All shared constants are defined in [`ap_common/constants.py`](https://github.com/jewzaam/ap-common/blob/main/ap_common/constants.py) and exported via `ap_common/__init__.py`.
+All shared constants are defined in [`ap_common/constants.py`](https://github.com/jewzaam/ap-common/blob/devel/ap_common/constants.py) and exported via `ap_common/__init__.py`.
 
 Categories include:
 - FITS header keys (`HEADER_*`)
