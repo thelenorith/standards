@@ -6,14 +6,14 @@
 
 <!-- Brief description of what this project does and why testing matters for it -->
 
-**Project:** ap-<name>
+**Project:** <project-name>
 **Primary functionality:** <one sentence description>
 
 ## Testing Philosophy
 
 <!-- What approach does this project take to testing? What's in scope vs out of scope? -->
 
-This project follows the [ap-base Testing Standards](https://github.com/jewzaam/ap-base/blob/main/standards/testing.md).
+This project follows the [Testing Standards](https://github.com/jewzaam/standards/blob/main/standards/testing.md).
 
 Key testing principles for this project:
 

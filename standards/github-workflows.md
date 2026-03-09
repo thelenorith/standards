@@ -1,6 +1,6 @@
 # GitHub Workflows
 
-Standard CI workflows for ap-* projects.
+Standard CI workflows for Python projects.
 
 ## Required Workflows
 

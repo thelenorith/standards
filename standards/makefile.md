@@ -1,6 +1,6 @@
 # Makefile Standards
 
-Standard Makefile targets for ap-* Python projects.
+Standard Makefile targets for Python projects.
 
 ## Default Target
 
@@ -29,26 +29,26 @@ make default   # Same as above (explicit)
 
 ## Shared Venv
 
-All ap-* projects share a single venv at `~/.venv/ap/`. See [Shared Virtual Environment](shared-venv.md) for the full standard.
+Related projects can share a single venv at a configurable location. See [Shared Virtual Environment](shared-venv.md) for the full standard.
 
 One-time setup:
 
 ```bash
-python3 -m venv ~/.venv/ap
+python3 -m venv ~/.venv/shared
 ```
 
 Then cd into any repo and run make as usual:
 
 ```bash
-cd ap-common
-make install-dev        # Detects ~/.venv/ap, installs there
+cd common
+make install-dev        # Detects ~/.venv/shared, installs there
 
-cd ../ap-cull-light
+cd ../my-project
 make install-dev        # Same shared venv
-make test               # Uses ~/.venv/ap automatically
+make test               # Uses ~/.venv/shared automatically
 ```
 
-The auto-detection uses `$(wildcard $(HOME)/.venv/ap/bin/python)` in each Makefile. If the shared venv does not exist (CI, new machine), it falls back to a local `.venv`.
+The auto-detection uses `$(wildcard $(HOME)/.venv/shared/bin/python)` in each Makefile. If the shared venv does not exist (CI, new machine), it falls back to a local `.venv`.
 
 The `install-no-deps` target is still available for cases where you need to install a package without pulling its dependencies from the network.
 
@@ -60,23 +60,23 @@ Copy [templates/Makefile](templates/Makefile) to your project and replace `<name
 
 ### VENV_DIR and PYTHON variables
 
-`VENV_DIR` and `PYTHON` auto-detect the shared venv at `~/.venv/ap` or fall back to a local one, with platform-appropriate paths:
+`VENV_DIR` and `PYTHON` auto-detect the shared venv or fall back to a local one, with platform-appropriate paths:
 
 ```makefile
 HOME_DIR := $(subst \,/,$(HOME))
 
 ifeq ($(OS),Windows_NT)
-    VENV_DIR ?= $(if $(wildcard $(HOME_DIR)/.venv/ap/Scripts/python.exe),$(HOME_DIR)/.venv/ap,.venv)
+    VENV_DIR ?= $(if $(wildcard $(HOME_DIR)/.venv/shared/Scripts/python.exe),$(HOME_DIR)/.venv/shared,.venv)
     PYTHON := $(VENV_DIR)/Scripts/python.exe
 else
-    VENV_DIR ?= $(if $(wildcard $(HOME_DIR)/.venv/ap/bin/python),$(HOME_DIR)/.venv/ap,.venv)
+    VENV_DIR ?= $(if $(wildcard $(HOME_DIR)/.venv/shared/bin/python),$(HOME_DIR)/.venv/shared,.venv)
     PYTHON := $(VENV_DIR)/bin/python
 endif
 ```
 
 `HOME_DIR` normalizes backslashes to forward slashes so paths work in both Windows shells and Unix.
 
-- **Shared venv exists**: `VENV_DIR` resolves to `~/.venv/ap`
+- **Shared venv exists**: `VENV_DIR` resolves to `~/.venv/shared`
 - **No shared venv**: `VENV_DIR` resolves to `.venv` (local)
 - **Override**: `make VENV_DIR=.venv test` always works
 
@@ -102,7 +102,7 @@ install-dev: $(PYTHON)
 	$(PYTHON) -m pip install -e ".[dev]"
 
 format: install-dev
-	$(PYTHON) -m black ap_<name> tests
+	$(PYTHON) -m black <package_name> tests
 ```
 
 ### Quiet failures in clean

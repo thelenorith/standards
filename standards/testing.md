@@ -1,6 +1,6 @@
 # Testing Standards
 
-Unit testing conventions for ap-* projects.
+Unit testing conventions for Python projects.
 
 ## Testing Philosophy
 
@@ -40,14 +40,14 @@ def test_normalize_date_iso_format(self):
 **Example - Unit test with mocking:**
 
 ```python
-@patch("ap_common.move_file")
-def test_reject_image_moves_file(self, mock_move_file, tmp_path):
-    """Test that reject_image calls move_file with correct arguments."""
-    source = tmp_path / "source" / "test.fits"
+@patch("my_project.move_file")
+def test_reject_item_moves_file(self, mock_move_file, tmp_path):
+    """Test that reject_item calls move_file with correct arguments."""
+    source = tmp_path / "source" / "test.dat"
     source.parent.mkdir(parents=True)
     source.write_text("test")
 
-    reject_image(str(source), reject_dir="/reject", source_dir=str(tmp_path))
+    reject_item(str(source), reject_dir="/reject", source_dir=str(tmp_path))
 
     mock_move_file.assert_called_once()
     assert "reject" in str(mock_move_file.call_args)
@@ -67,18 +67,16 @@ Test multiple components working together, verifying contracts between modules.
 **Example - Integration test:**
 
 ```python
-def test_workflow_darks_only(self, tmp_path):
-    """Test full workflow with only dark frames."""
-    # Create actual test files
-    dark_dir = tmp_path / "darks"
-    dark_dir.mkdir()
-    create_minimal_fits(dark_dir / "dark1.fits", {"IMAGETYP": "DARK"})
+def test_workflow_processing(self, tmp_path):
+    """Test full workflow with sample data."""
+    data_dir = tmp_path / "data"
+    data_dir.mkdir()
+    create_test_file(data_dir / "sample.dat", {"type": "primary"})
 
-    # Run actual workflow (not mocked)
-    result = process_calibration_directory(str(tmp_path))
+    result = process_directory(str(tmp_path))
 
-    assert result.dark_count == 1
-    assert result.bias_count == 0
+    assert result.processed_count == 1
+    assert result.skipped_count == 0
 ```
 
 ### Where to Draw the Line
@@ -87,7 +85,7 @@ def test_workflow_darks_only(self, tmp_path):
 |----------|-----------|-----------|
 | String parsing/formatting | Unit | Pure logic, no dependencies |
 | File path construction | Unit | Logic only, mock filesystem checks |
-| FITS header extraction | Unit | Mock `astropy.io.fits` |
+| Header/metadata extraction | Unit | Mock I/O libraries |
 | CLI argument parsing | Unit | Mock `sys.argv` |
 | Full file processing workflow | Integration | Tests real component interaction |
 | Directory traversal + filtering | Integration | Multiple modules cooperating |
@@ -114,12 +112,12 @@ Link tests to the bug they validate:
 ```python
 def test_filename_override_takes_precedence(self):
     """
-    Regression test for https://github.com/jewzaam/ap-common/issues/15
+    Regression test for <issue-url>
 
-    Bug: Master dark with EXPOSURE in filename used FITS header value
+    Bug: Processing with override enabled used metadata value
     instead of filename value.
 
-    Fix: Filename-parsed values now take precedence over FITS headers
+    Fix: Filename-parsed values now take precedence over metadata
     when file_naming_override=True.
     """
     # ... test implementation
@@ -223,9 +221,9 @@ Use pytest's `tmp_path` fixture for any file operations:
 
 ```python
 def test_copy_file(tmp_path):
-    source = tmp_path / "source.fits"
+    source = tmp_path / "source.dat"
     source.write_bytes(b"test")
-    dest = tmp_path / "dest.fits"
+    dest = tmp_path / "dest.dat"
 
     copy_file(str(source), str(dest))
 
@@ -240,7 +238,7 @@ Git LFS has a $0 budget limit and is not funded for these projects. Large binary
 
 Store test data files in `tests/fixtures/`. Prefer small, minimal test files:
 
-- **Generate programmatically** when possible (mock FITS headers, minimal valid files)
+- **Generate programmatically** when possible (mock data, minimal valid files)
 - **Keep fixtures small** - only what's needed to test functionality
 - **Avoid large binary files** - they bloat the repository
 - **Document fixtures** - add `tests/fixtures/README.md` explaining each file's purpose
@@ -248,39 +246,33 @@ Store test data files in `tests/fixtures/`. Prefer small, minimal test files:
 Example of generating minimal test data:
 
 ```python
-from astropy.io import fits
-import numpy as np
-
-def create_minimal_fits(path, header_data=None):
-    """Create minimal valid FITS file for testing."""
-    data = np.zeros((10, 10), dtype=np.uint16)
-    hdu = fits.PrimaryHDU(data)
-    if header_data:
-        for key, value in header_data.items():
-            hdu.header[key] = value
-    hdu.writeto(path, overwrite=True)
+def create_test_file(path, metadata=None):
+    """Create minimal valid test file."""
+    data = {"content": "test", "metadata": metadata or {}}
+    with open(path, "w") as f:
+        json.dump(data, f)
 ```
 
 ## Naming
 
 | Item | Pattern | Example |
 |------|---------|---------|
-| Test files | `test_<module>.py` | `test_move.py` |
-| Test functions | `test_<function>_<scenario>` | `test_build_path_missing_camera_raises` |
+| Test files | `test_<module>.py` | `test_processor.py` |
+| Test functions | `test_<function>_<scenario>` | `test_build_path_missing_input_raises` |
 | Test classes | `Test<Class>` | `TestMetadataExtraction` |
-| Bug fix tests | `test_<function>_<issue>` | `test_exposure_override_issue_15` |
+| Bug fix tests | `test_<function>_<issue>` | `test_override_issue_15` |
 
 ## Test Organization
 
 One test file per module:
 
 ```
-ap_<name>/
-├── move.py
+<package_name>/
+├── processor.py
 └── config.py
 
 tests/
-├── test_move.py
+├── test_processor.py
 └── test_config.py
 ```
 
@@ -288,8 +280,8 @@ For modules with significant integration testing needs:
 
 ```
 tests/
-├── test_move.py              # Unit tests
-├── test_move_integration.py  # Integration tests
+├── test_processor.py              # Unit tests
+├── test_processor_integration.py  # Integration tests
 └── test_config.py
 ```
 
@@ -326,19 +318,18 @@ Avoid these testing mistakes:
 ```python
 # BAD - only tests that no exception is raised
 def test_process_file(tmp_path):
-    process_file(str(tmp_path / "test.fits"))
+    process_file(str(tmp_path / "test.dat"))
     # No assertions!
 
 # GOOD - verifies expected behavior
 def test_process_file_creates_output(tmp_path):
-    input_file = tmp_path / "test.fits"
-    create_minimal_fits(input_file)
+    input_file = tmp_path / "test.dat"
+    create_test_file(input_file)
 
     process_file(str(input_file))
 
-    output_file = tmp_path / "test_processed.fits"
+    output_file = tmp_path / "test_processed.dat"
     assert output_file.exists()
-    assert get_header(output_file, "PROCESSED") == "TRUE"
 ```
 
 ### Accepting Errors as Success
@@ -354,9 +345,9 @@ def test_move_file(tmp_path):
 
 # GOOD - clear expectations
 def test_move_file(tmp_path):
-    source = tmp_path / "source.fits"
+    source = tmp_path / "source.dat"
     source.write_bytes(b"test")
-    dest = tmp_path / "dest.fits"
+    dest = tmp_path / "dest.dat"
 
     move_file(str(source), str(dest))
 
@@ -375,8 +366,8 @@ def test_invalid_value_handling(mock_logger):
 
 # GOOD - verifies actual behavior
 def test_invalid_value_skips_file(tmp_path):
-    result = process_file({"value": "invalid", "filename": "test.fits"})
+    result = process_file({"value": "invalid", "filename": "test.dat"})
 
     assert result.skipped_count == 1
-    assert "test.fits" in result.skipped_files
+    assert "test.dat" in result.skipped_files
 ```

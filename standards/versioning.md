@@ -1,6 +1,6 @@
 # Versioning Standards
 
-Semantic versioning conventions for ap-* projects.
+Semantic versioning conventions for Python projects.
 
 ## Version Format
 
@@ -33,7 +33,7 @@ A breaking change is anything that causes existing usage to fail or produce diff
 
 ## Integration Surface
 
-The supported integration pattern for ap-* tools is the **command-line interface**.
+The supported integration pattern for CLI tools is the **command-line interface**.
 
 | Integration Method | Status | Versioning Applies? |
 |--------------------|--------|---------------------|
@@ -41,7 +41,7 @@ The supported integration pattern for ap-* tools is the **command-line interface
 | Python module import | Not supported | No - internal, may change without notice |
 | REST/HTTP API | Not yet available | TODO |
 
-**Do not import ap-* modules directly.** Internal function signatures, module layout, and return types may change in any release without a major version bump. The CLI is the contract.
+**Do not import project modules directly.** Internal function signatures, module layout, and return types may change in any release without a major version bump. The CLI is the contract.
 
 <!-- TODO: Define an API layer for programmatic integration. Until then, CLI is the only stable interface. -->
 
@@ -53,9 +53,9 @@ Increment major version when the CLI contract changes in an incompatible way.
 
 **Examples:**
 
-- `--blink-dir` renamed to `--blink-path`
+- `--output-dir` renamed to `--output-path`
 - `--no-overwrite` removed
-- Default behavior of `--scale-dark` changed from off to on
+- Default behavior of a flag changed from off to on
 
 ### Minor (`Y`) - New Features
 
@@ -75,7 +75,7 @@ Increment patch version for fixes that correct behavior to match documented inte
 **Examples:**
 
 - Fix crash on empty directory input
-- Fix incorrect FITS header value extraction
+- Fix incorrect metadata extraction
 - Fix `--quiet` flag not suppressing progress bars
 - Documentation corrections
 - Performance improvements with no behavior change

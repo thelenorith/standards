@@ -1,6 +1,6 @@
 # Logging, Progress, and Output Standards
 
-Guidelines for output methods in ap-* CLI tools. Based on industry best practices including the 12-Factor App methodology and Python logging conventions.
+Guidelines for output methods in Python CLI tools. Based on industry best practices including the 12-Factor App methodology and Python logging conventions.
 
 ## Overview
 
@@ -26,13 +26,13 @@ Use Python logging for **operational and diagnostic information**:
 
 ### Configuration
 
-Use `ap_common.logging_config` for consistent setup:
+Use a centralized logging setup for consistent configuration:
 
 ```python
-from ap_common import setup_logging
+from common import setup_logging
 
 def main():
-    logger = setup_logging(name="ap_my_tool", debug=args.debug, quiet=args.quiet)
+    logger = setup_logging(name="my_tool", debug=args.debug, quiet=args.quiet)
 ```
 
 | Rule | Rationale |
@@ -56,10 +56,10 @@ Use hierarchical names for filtering:
 
 ```python
 # Main module
-logger = setup_logging(name="ap_my_tool", debug=debug)
+logger = setup_logging(name="my_tool", debug=debug)
 
 # Submodules
-logger = logging.getLogger("ap_my_tool.submodule")
+logger = logging.getLogger("my_tool.submodule")
 ```
 
 ### What to Log
@@ -70,22 +70,22 @@ logger.debug(f"Processing file: {filename}")
 logger.debug(f"Header values: {headers}")
 
 # INFO: Operational milestones
-logger.info("Starting calibration process")
+logger.info("Starting processing")
 logger.info(f"Found {count} files to process")
 
 # INFO: Multi-parameter information (single statement, key=value format)
 logger.info(
-    f"Executing PixInsight: binary={binary}, script={script}, "
+    f"Executing command: binary={binary}, script={script}, "
     f"log={log_file}, instance={instance_id}"
 )
 
 # WARNING: Recoverable issues
-logger.warning(f"Missing optional header key: {key}")
+logger.warning(f"Missing optional key: {key}")
 logger.warning(f"File exists, skipping: {dest}")
 
 # ERROR: Operation failures
 logger.error(f"Failed to read file: {filename}")
-logger.error(f"Invalid header format in {path}")
+logger.error(f"Invalid format in {path}")
 ```
 
 ### What NOT to Log
@@ -100,14 +100,14 @@ logger.error(f"Invalid header format in {path}")
 
 ```python
 # BAD: Multiple separate log calls with whitespace padding
-logger.info("Executing PixInsight...")
+logger.info("Executing command...")
 logger.info(f"  Binary: {binary}")
 logger.info(f"  Script: {script}")
 logger.info(f"  Log: {log_file}")
 
 # GOOD: Single log statement with key=value format
 logger.info(
-    f"Executing PixInsight: binary={binary}, script={script}, log={log_file}"
+    f"Executing command: binary={binary}, script={script}, log={log_file}"
 )
 ```
 
@@ -124,12 +124,12 @@ Use progress indicators for **long-running operations** that process multiple it
 | Unknown total count | `ProgressTracker` (manual mode) |
 | < 3 items or instant operations | None needed |
 
-### Using ap_common Progress Utilities
+### Using Common Progress Utilities
 
 **Simple iteration:**
 
 ```python
-from ap_common import progress_iter
+from common import progress_iter
 
 for f in progress_iter(files, desc="Processing", enabled=not quiet):
     process_file(f)
@@ -138,7 +138,7 @@ for f in progress_iter(files, desc="Processing", enabled=not quiet):
 **With status updates:**
 
 ```python
-from ap_common import ProgressTracker
+from common import ProgressTracker
 
 with ProgressTracker(files, desc="Processing", enabled=show_progress) as tracker:
     for f in tracker:
@@ -186,7 +186,7 @@ parser.add_argument("--quiet", "-q", action="store_true",
 |-------|-----|
 | Manual dot printing (`print(".", end="")`) | Inconsistent, no metrics |
 | Logging progress updates | Wrong abstraction level |
-| Custom progress implementations | Duplicates ap_common functionality |
+| Custom progress implementations | Duplicates common library functionality |
 
 ## Print Statements (stdout)
 
@@ -198,8 +198,8 @@ Use print for **primary program output** that may be piped or captured:
 |----------|---------|
 | Final results/summaries | "Moved 42 files to /data" |
 | Data output | File lists, JSON output |
-| User decisions | "REJECTED: file.fits (low quality)" |
-| Dry-run output | "Would move: src → dest" |
+| User decisions | "REJECTED: file.dat (low quality)" |
+| Dry-run output | "Would move: src -> dest" |
 
 ### Print Guidelines
 
@@ -210,7 +210,7 @@ if not quiet:
 
 # Dry-run output
 if dryrun:
-    print(f"Would move: {src} → {dest}")
+    print(f"Would move: {src} -> {dest}")
 
 # Rejection/decision output
 print(f"REJECTED: {filename} (reason: {reason})")
@@ -229,7 +229,7 @@ print(f"REJECTED: {filename} (reason: {reason})")
 
 Use this matrix to choose the right output method:
 
-| Question | Yes → Use |
+| Question | Yes -> Use |
 |----------|-----------|
 | Is this diagnostic/debugging information? | Logging |
 | Is this a warning or error condition? | Logging |
@@ -243,11 +243,11 @@ Use this matrix to choose the right output method:
 ### Standard CLI Tool Structure
 
 ```python
-from ap_common import setup_logging, progress_iter
+from common import setup_logging, progress_iter
 
 def main():
     args = parse_args()
-    logger = setup_logging(name="ap_my_tool", debug=args.debug, quiet=args.quiet)
+    logger = setup_logging(name="my_tool", debug=args.debug, quiet=args.quiet)
 
     logger.info("Starting processing")  # Suppressed by --quiet
 
@@ -270,10 +270,10 @@ def main():
 ```python
 for src, dest in progress_iter(moves, desc="Moving files", enabled=not quiet):
     if dryrun:
-        print(f"Would move: {src} → {dest}")
+        print(f"Would move: {src} -> {dest}")
     else:
         shutil.move(src, dest)
-        logger.debug(f"Moved: {src} → {dest}")
+        logger.debug(f"Moved: {src} -> {dest}")
 
 if not dryrun:
     print(f"Moved {len(moves)} files")
@@ -297,8 +297,8 @@ except Exception as e:
 
 ## Summary Table
 
-| Output Type | Stream | Controlled By | ap_common Utility |
-|-------------|--------|---------------|-------------------|
+| Output Type | Stream | Controlled By | Common Utility |
+|-------------|--------|---------------|----------------|
 | Logging (DEBUG) | stderr | `--debug` | `setup_logging()`, `get_logger()` |
 | Logging (INFO) | stderr | `--quiet` (suppresses) | `setup_logging()`, `get_logger()` |
 | Logging (WARNING+) | stderr | Always shown | `setup_logging()`, `get_logger()` |

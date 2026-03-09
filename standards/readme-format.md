@@ -1,13 +1,13 @@
 # README Format
 
-Standard structure for ap-* project READMEs.
+Standard structure for project READMEs.
 
 ## Structure
 
 1. Title
 2. Badges
 3. Brief description (1-2 sentences)
-4. Documentation links (ap-base boilerplate)
+4. Documentation links
 5. Overview (what it does, key features)
 6. Installation
 7. Usage (with examples)
@@ -17,20 +17,20 @@ Standard structure for ap-* project READMEs.
 Use the package name as the title:
 
 ```markdown
-# ap-<name>
+# <project-name>
 ```
 
 Do not use prose titles like "Light Frame Organization Tool".
 
 ## Badges
 
-Seven standard badges, formatted on two lines for readability:
+Standard badges, formatted on two lines for readability:
 
 **Line 1:** Workflow badges (Test, Coverage, Lint, Format, Type Check)
 **Line 2:** Language and style badges (Python version, Black formatting)
 
 ```markdown
-[![Test](https://github.com/jewzaam/ap-<name>/workflows/Test/badge.svg)](https://github.com/jewzaam/ap-<name>/actions/workflows/test.yml) [![Coverage](https://github.com/jewzaam/ap-<name>/workflows/Coverage%20Check/badge.svg)](https://github.com/jewzaam/ap-<name>/actions/workflows/coverage.yml) [![Lint](https://github.com/jewzaam/ap-<name>/workflows/Lint/badge.svg)](https://github.com/jewzaam/ap-<name>/actions/workflows/lint.yml) [![Format](https://github.com/jewzaam/ap-<name>/workflows/Format%20Check/badge.svg)](https://github.com/jewzaam/ap-<name>/actions/workflows/format.yml) [![Type Check](https://github.com/jewzaam/ap-<name>/workflows/Type%20Check/badge.svg)](https://github.com/jewzaam/ap-<name>/actions/workflows/typecheck.yml)
+[![Test](https://github.com/<owner>/<project-name>/workflows/Test/badge.svg)](https://github.com/<owner>/<project-name>/actions/workflows/test.yml) [![Coverage](https://github.com/<owner>/<project-name>/workflows/Coverage%20Check/badge.svg)](https://github.com/<owner>/<project-name>/actions/workflows/coverage.yml) [![Lint](https://github.com/<owner>/<project-name>/workflows/Lint/badge.svg)](https://github.com/<owner>/<project-name>/actions/workflows/lint.yml) [![Format](https://github.com/<owner>/<project-name>/workflows/Format%20Check/badge.svg)](https://github.com/<owner>/<project-name>/actions/workflows/format.yml) [![Type Check](https://github.com/<owner>/<project-name>/workflows/Type%20Check/badge.svg)](https://github.com/<owner>/<project-name>/actions/workflows/typecheck.yml)
 [![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/) [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 ```
 
@@ -41,33 +41,30 @@ Seven standard badges, formatted on two lines for readability:
 One or two sentences immediately after badges. State what the tool does, not implementation details.
 
 Good:
-> A tool for organizing light frames based on FITS metadata.
+> A tool for organizing data files based on metadata.
 
 Bad:
-> This Python package uses astropy to read FITS headers and organize files into directories.
+> This Python package uses the standard library to read file headers and organize files into directories.
 
 ## Documentation Links
 
-All projects must include standard boilerplate linking back to ap-base for comprehensive documentation:
+Projects that are part of a larger suite should include links to the parent documentation:
 
 ```markdown
 ## Documentation
 
-This tool is part of the astrophotography pipeline. For comprehensive documentation including workflow guides and integration with other tools, see:
+This tool is part of the <suite name>. For comprehensive documentation:
 
-- **[Pipeline Overview](https://github.com/jewzaam/ap-base/blob/main/docs/index.md)** - Full pipeline documentation
-- **[Workflow Guide](https://github.com/jewzaam/ap-base/blob/main/docs/workflow.md)** - Detailed workflow with diagrams
-- **[ap-<name> Guide](https://github.com/jewzaam/ap-base/blob/main/docs/tools/ap-<name>.md)** - Detailed usage guide for this tool
+- **[Overview](<link>)** - Full documentation
+- **[<project-name> Guide](<link>)** - Detailed usage guide for this tool
 ```
-
-Replace `<name>` with the actual project name (e.g., `ap-common`, `ap-cull-light`).
 
 ## Overview
 
 Expand on the description. Cover:
 - What problem it solves
 - Key features (bulleted list)
-- How it fits in the pipeline (if relevant)
+- How it fits in the project suite (if relevant)
 
 Keep it brief. Users want to know what it does, not how.
 
@@ -87,7 +84,7 @@ make install-dev
 ### From Git
 
 \`\`\`bash
-pip install git+https://github.com/jewzaam/ap-<name>.git
+pip install git+https://github.com/<owner>/<project-name>.git
 \`\`\`
 ```
 
@@ -99,7 +96,7 @@ Show the command-line interface with examples:
 ## Usage
 
 \`\`\`bash
-python -m ap_<name>.<module> <source_dir> <dest_dir> [options]
+python -m <package_name>.<module> <source_dir> <dest_dir> [options]
 \`\`\`
 
 ### Options

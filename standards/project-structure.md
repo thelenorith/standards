@@ -1,13 +1,13 @@
 # Project Structure
 
-Standard directory layout for ap-* Python projects.
+Standard directory layout for Python projects.
 
 ## Directory Layout
 
 ```
-ap-<name>/
+<project-name>/
 ├── .venv/                  # Virtual environment (created by make, git-ignored)
-├── ap_<name>/              # Package directory (underscores)
+├── <package_name>/         # Package directory (underscores)
 │   ├── __init__.py
 │   ├── __main__.py         # Entry point for python -m
 │   └── <module>.py
@@ -30,7 +30,7 @@ ap-<name>/
 └── pyproject.toml
 ```
 
-The `.venv/` directory is created automatically by `make install-dev` and must be git-ignored. When working in the ap-base monorepo, submodules share a single venv at the monorepo root instead. See [Shared Virtual Environment](shared-venv.md).
+The `.venv/` directory is created automatically by `make install-dev` and must be git-ignored. When working in a monorepo, submodules share a single venv at the monorepo root instead. See [Shared Virtual Environment](shared-venv.md).
 
 ## Required Files
 
@@ -46,10 +46,10 @@ The `.venv/` directory is created automatically by `make install-dev` and must b
 
 ## Naming Conventions
 
-See [Naming](naming.md) for the full naming taxonomy and pattern.
+See [Naming](naming.md) for the full naming conventions.
 
-- **Repository**: `ap-{verb}-{noun}` or `ap-{verb}-{noun}-to-{dest}` (hyphenated)
-- **Package directory**: Same as repository with underscores (e.g., `ap_cull_light`)
+- **Repository**: lowercase, hyphenated (e.g., `my-project`)
+- **Package directory**: Same as repository with underscores (e.g., `my_project`)
 - **Module files**: lowercase, underscored
 - **Test files**: `test_<module>.py`
 
@@ -61,19 +61,17 @@ requires = ["setuptools>=61.0", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "ap-<name>"
+name = "<project-name>"
 version = "0.1.0"
 description = "<brief description>"
 readme = "README.md"
 requires-python = ">=3.10"
 license = {file = "LICENSE"}
 authors = [
-    {name = "Naveen Malik"}
+    {name = "<author name>"}
 ]
-keywords = ["astrophotography"]
 classifiers = [
     "Development Status :: 4 - Beta",
-    "Intended Audience :: Science/Research",
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
@@ -95,7 +93,7 @@ dev = [
 
 [tool.setuptools.packages.find]
 where = ["."]
-include = ["ap_<name>*"]
+include = ["<package_name>*"]
 ```
 
 ## .gitignore
@@ -131,5 +129,5 @@ venv/
 ```
 include LICENSE
 include README.md
-recursive-include ap_<name> *.py
+recursive-include <package_name> *.py
 ```

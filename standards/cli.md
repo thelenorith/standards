@@ -1,6 +1,6 @@
 # CLI Standards
 
-Command-line interface conventions for ap-* tools.
+Command-line interface conventions for Python CLI tools.
 
 ## Options
 
@@ -66,8 +66,7 @@ parser.add_argument(
     "--scale-dark",
     action=argparse.BooleanOptionalAction,
     default=False,
-    help="scale dark frames using bias compensation (allows shorter exposures). "
-    "Default: exact exposure match only",
+    help="enable dark frame scaling. Default: disabled",
 )
 ```
 
@@ -75,9 +74,6 @@ parser.add_argument(
 - Features that can be enabled or disabled
 - Behavior that should be explicitly controllable
 - Replacing simple `action="store_true"` flags where negation is useful
-
-**Example:**
-- `--scale-dark` - Enable bias-compensated dark frame scaling
 
 ## Positional Arguments
 

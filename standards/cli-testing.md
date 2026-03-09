@@ -1,6 +1,6 @@
 # CLI Testing Standards
 
-Unit testing conventions for CLI entry points (main() functions) in ap-* projects.
+Unit testing conventions for CLI entry points (main() functions) in Python projects.
 
 ## Purpose
 
@@ -30,9 +30,9 @@ dev = [
 argparse converts `--scale-dark` to attribute `args.scale_dark` (hyphen becomes underscore).
 Common bugs:
 
-- Typo: `args.scale_darks` (plural) when only `args.scale_dark` exists → AttributeError
-- Case: `args.Scale_dark` when only `args.scale_dark` exists → AttributeError
-- Wrong delimiter: `args.scale.dark` when only `args.scale_dark` exists → AttributeError
+- Typo: `args.scale_darks` (plural) when only `args.scale_dark` exists -> AttributeError
+- Case: `args.Scale_dark` when only `args.scale_dark` exists -> AttributeError
+- Wrong delimiter: `args.scale.dark` when only `args.scale_dark` exists -> AttributeError
 
 These bugs are invisible to:
 - Linters (flake8, pylint) - cannot validate dynamic Namespace attributes
@@ -43,18 +43,16 @@ These bugs are invisible to:
 
 ## Required Coverage
 
-Every ap-* module with a CLI entry point MUST have tests covering:
+Every module with a CLI entry point MUST have tests covering:
 
-1. ✅ **Basic execution** - minimal required arguments
-2. ✅ **Each boolean flag individually** - test both enabled and disabled states
-3. ✅ **Each value argument** - verify type conversion and value passing
-4. ✅ **Multiple flags combined** - ensure no interaction bugs
-5. ✅ **Error conditions** - invalid args, missing required values
-6. ✅ **Exit code validation** - verify EXIT_SUCCESS vs EXIT_ERROR
+1. **Basic execution** - minimal required arguments
+2. **Each boolean flag individually** - test both enabled and disabled states
+3. **Each value argument** - verify type conversion and value passing
+4. **Multiple flags combined** - ensure no interaction bugs
+5. **Error conditions** - invalid args, missing required values
+6. **Exit code validation** - verify EXIT_SUCCESS vs EXIT_ERROR
 
 ## Testing Pattern (Reference Implementation)
-
-Based on `ap-copy-master-to-blink/tests/test_main.py` (lines 101-117):
 
 ```python
 from unittest.mock import patch
@@ -76,13 +74,13 @@ def test_flag_name(mock_validate, mock_business):
 ```
 
 **Why this pattern works:**
-- Patches `sys.argv` → tests real argparse behavior
-- Calls real `main()` → exercises actual attribute access
-- Mocks business function → isolates argparse logic, fast tests
-- Verifies `call_args.kwargs` → catches attribute name mismatches immediately
+- Patches `sys.argv` -> tests real argparse behavior
+- Calls real `main()` -> exercises actual attribute access
+- Mocks business function -> isolates argparse logic, fast tests
+- Verifies `call_args.kwargs` -> catches attribute name mismatches immediately
 
 If code has `args.scale_darks` but argparse defines `args.scale_dark`:
-→ Test fails with `AttributeError` (production bug caught in test suite)
+-> Test fails with `AttributeError` (production bug caught in test suite)
 
 ## Test File Organization
 
@@ -90,7 +88,7 @@ If code has `args.scale_darks` but argparse defines `args.scale_dark`:
 |----------------|----------------|
 | `__main__.py` | `tests/test_main.py` |
 | `cli.py` | `tests/test_cli.py` |
-| Module file (e.g., `cull_lights.py`) | `tests/test_<module>.py` |
+| Module file (e.g., `processor.py`) | `tests/test_<module>.py` |
 
 Separate CLI tests from business logic tests for clarity.
 
@@ -144,7 +142,7 @@ def test_combined_flags():
 
 ## Common Anti-Patterns
 
-### ❌ DON'T: Test without verifying kwargs
+### DON'T: Test without verifying kwargs
 
 ```python
 def test_flag():
@@ -153,7 +151,7 @@ def test_flag():
     mock_business.assert_called_once()  # Called, but with what args?
 ```
 
-### ❌ DON'T: Only test that code runs
+### DON'T: Only test that code runs
 
 ```python
 def test_main():
@@ -161,7 +159,7 @@ def test_main():
         main()  # No assertions - worthless test
 ```
 
-### ✅ DO: Verify exact kwargs/args
+### DO: Verify exact kwargs/args
 
 ```python
 def test_flag():
@@ -185,11 +183,5 @@ When reviewing or adding CLI tests:
 - [ ] Error conditions tested (invalid args, missing paths)
 - [ ] Exit codes validated (EXIT_SUCCESS, EXIT_ERROR)
 - [ ] Tests run and pass: `pytest tests/test_main.py -v`
-
-## Reference Implementations
-
-**Best Practice Examples:**
-- `ap-copy-master-to-blink/tests/test_main.py` - Comprehensive, all flags, kwargs verification
-- `ap-empty-directory/tests/test_cli.py` - Alternative pattern with monkeypatch
 
 **See:** [Testing Standards](testing.md) for general testing philosophy and patterns.

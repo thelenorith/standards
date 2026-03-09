@@ -1,20 +1,19 @@
 # Shared Virtual Environment
 
-Standard for using Python virtual environments across ap-* projects.
+Standard for using Python virtual environments across related projects.
 
 ## Rationale
 
 - **Isolation** - Never install project dependencies into the system Python
 - **Reproducibility** - Everyone gets the same environment per `pyproject.toml`
-- **Shared across repos** - One venv for all ap-* tools avoids redundant installs of shared dependencies (astropy, xisf, etc.)
+- **Shared across repos** - One venv for all related tools avoids redundant installs of shared dependencies
 - **Simplicity** - `make install-dev` is all you need; venv creation is automatic
 
 ## How It Works
 
-All ap-* projects share a single venv at `~/.venv/ap/`. This location is:
+Related projects can share a single venv at a configurable location (e.g., `~/.venv/shared/`). This location is:
 
 - **Independent of directory structure** - works from any checkout, monorepo or standalone
-- **Uniquely named** - `ap` identifies it as the astrophotography pipeline venv, no collisions with other projects
 - **In the home directory** - a natural place for user-level development tooling
 
 Each Makefile auto-detects whether the shared venv exists, with platform-appropriate paths:
@@ -24,17 +23,17 @@ Each Makefile auto-detects whether the shared venv exists, with platform-appropr
 HOME_DIR := $(subst \,/,$(HOME))
 
 ifeq ($(OS),Windows_NT)
-    VENV_DIR ?= $(if $(wildcard $(HOME_DIR)/.venv/ap/Scripts/python.exe),$(HOME_DIR)/.venv/ap,.venv)
+    VENV_DIR ?= $(if $(wildcard $(HOME_DIR)/.venv/shared/Scripts/python.exe),$(HOME_DIR)/.venv/shared,.venv)
     PYTHON := $(VENV_DIR)/Scripts/python.exe
 else
-    VENV_DIR ?= $(if $(wildcard $(HOME_DIR)/.venv/ap/bin/python),$(HOME_DIR)/.venv/ap,.venv)
+    VENV_DIR ?= $(if $(wildcard $(HOME_DIR)/.venv/shared/bin/python),$(HOME_DIR)/.venv/shared,.venv)
     PYTHON := $(VENV_DIR)/bin/python
 endif
 ```
 
 `$(HOME)` is normalized to forward slashes via `$(subst \,/,$(HOME))` because on Windows `$(HOME)` contains backslashes (e.g. `C:\Users\you`) which the shell interprets as escape characters. Tilde is not used because Make does not expand it in variable assignments. `$(OS)` is set to `Windows_NT` by Windows itself, so the conditional works without any configuration.
 
-- If the shared venv python exists: `VENV_DIR` resolves to `~/.venv/ap`
+- If the shared venv python exists: `VENV_DIR` resolves to `~/.venv/shared`
 - If it does not exist: `VENV_DIR` falls back to `.venv` (local)
 - Manual override always works: `make VENV_DIR=.venv test`
 
@@ -43,53 +42,53 @@ endif
 Create the shared venv once:
 
 ```bash
-python3 -m venv ~/.venv/ap
+python3 -m venv ~/.venv/shared
 ```
 
-Then install submodules into it from any checkout:
+Then install projects into it from any checkout:
 
 ```bash
-cd ap-common
-make install-dev        # Detects ~/.venv/ap, installs there
+cd common
+make install-dev        # Detects ~/.venv/shared, installs there
 
-cd ../ap-cull-light
-make install-dev        # Same shared venv, ap-common already available
+cd ../my-project
+make install-dev        # Same shared venv, common already available
 ```
 
 All installs are editable (`pip install -e`), so source changes in any submodule are immediately visible to all others.
 
 ## Day-to-Day Development
 
-Once `~/.venv/ap` exists, every `make` command uses it automatically:
+Once `~/.venv/shared` exists, every `make` command uses it automatically:
 
 ```bash
-cd ap-cull-light
-make test               # Uses ~/.venv/ap/bin/python
+cd my-project
+make test               # Uses ~/.venv/shared/bin/python
 make default            # Full check suite, same shared venv
 ```
 
-This works identically whether the repo is cloned standalone or checked out as an ap-base submodule.
+This works identically whether the repo is cloned standalone or checked out as a monorepo submodule.
 
 ### Cross-repo development
 
-When modifying ap-common and testing the change in ap-cull-light:
+When modifying the common library and testing the change in another project:
 
 ```bash
-cd ap-common
-# Edit ap_common/constants.py
-cd ../ap-cull-light
-make test               # Picks up ap-common changes immediately
+cd common
+# Edit common/constants.py
+cd ../my-project
+make test               # Picks up common changes immediately
 ```
 
 No `install-no-deps` workarounds needed - editable installs in a shared venv handle this naturally.
 
 ## Fallback to Local Venv
 
-If `~/.venv/ap` does not exist (new machine, CI, contributor who has not set it up), the Makefile falls back to a local `.venv` in the project directory:
+If `~/.venv/shared` does not exist (new machine, CI, contributor who has not set it up), the Makefile falls back to a local `.venv` in the project directory:
 
 ```bash
-cd ap-cull-light
-make install-dev        # No ~/.venv/ap found, creates ./ap-cull-light/.venv/
+cd my-project
+make install-dev        # No ~/.venv/shared found, creates ./my-project/.venv/
 make test               # Uses .venv/bin/python
 ```
 
@@ -103,12 +102,12 @@ The full pattern used in [templates/Makefile](templates/Makefile):
 # Normalize HOME to forward slashes (no-op on Unix, fixes Windows backslashes)
 HOME_DIR := $(subst \,/,$(HOME))
 
-# Use shared ~/.venv/ap if it exists, otherwise local .venv
+# Use shared ~/.venv/shared if it exists, otherwise local .venv
 ifeq ($(OS),Windows_NT)
-    VENV_DIR ?= $(if $(wildcard $(HOME_DIR)/.venv/ap/Scripts/python.exe),$(HOME_DIR)/.venv/ap,.venv)
+    VENV_DIR ?= $(if $(wildcard $(HOME_DIR)/.venv/shared/Scripts/python.exe),$(HOME_DIR)/.venv/shared,.venv)
     PYTHON := $(VENV_DIR)/Scripts/python.exe
 else
-    VENV_DIR ?= $(if $(wildcard $(HOME_DIR)/.venv/ap/bin/python),$(HOME_DIR)/.venv/ap,.venv)
+    VENV_DIR ?= $(if $(wildcard $(HOME_DIR)/.venv/shared/bin/python),$(HOME_DIR)/.venv/shared,.venv)
     PYTHON := $(VENV_DIR)/bin/python
 endif
 
@@ -131,7 +130,7 @@ Key details:
 
 ## CI Compatibility
 
-GitHub Actions workflows do not need changes. In CI there is no `~/.venv/ap`, so the auto-detection falls through to a local `.venv`. The `actions/setup-python` action puts a specific Python version on `PATH`, and `python3 -m venv` uses that version.
+GitHub Actions workflows do not need changes. In CI there is no `~/.venv/shared`, so the auto-detection falls through to a local `.venv`. The `actions/setup-python` action puts a specific Python version on `PATH`, and `python3 -m venv` uses that version.
 
 ## What to Avoid
 
