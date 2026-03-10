@@ -1,17 +1,18 @@
 # Makefile template for Python projects
-# Replace <name> with the project name (e.g., my-project -> my_project)
+# Replace <name> with the package name (e.g., dp-cull-record -> dp_cull_record)
 
 .PHONY: install install-dev install-no-deps uninstall clean format lint typecheck test test-verbose coverage default
 
 # Normalize HOME to forward slashes (no-op on Unix, fixes Windows backslashes)
 HOME_DIR := $(subst \,/,$(HOME))
 
-# Use shared ~/.venv/shared if it exists, otherwise local .venv
+# Replace <group> with the project group name (e.g., dp for dp-common, dp-cull-record, etc.)
+# Use shared ~/.venv/<group> if it exists, otherwise local .venv
 ifeq ($(OS),Windows_NT)
-    VENV_DIR ?= $(if $(wildcard $(HOME_DIR)/.venv/shared/Scripts/python.exe),$(HOME_DIR)/.venv/shared,.venv)
+    VENV_DIR ?= $(if $(wildcard $(HOME_DIR)/.venv/<group>/Scripts/python.exe),$(HOME_DIR)/.venv/<group>,.venv)
     PYTHON := $(VENV_DIR)/Scripts/python.exe
 else
-    VENV_DIR ?= $(if $(wildcard $(HOME_DIR)/.venv/shared/bin/python),$(HOME_DIR)/.venv/shared,.venv)
+    VENV_DIR ?= $(if $(wildcard $(HOME_DIR)/.venv/<group>/bin/python),$(HOME_DIR)/.venv/<group>,.venv)
     PYTHON := $(VENV_DIR)/bin/python
 endif
 

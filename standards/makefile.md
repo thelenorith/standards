@@ -34,21 +34,21 @@ Related projects can share a single venv at a configurable location. See [Shared
 One-time setup:
 
 ```bash
-python3 -m venv ~/.venv/shared
+python3 -m venv ~/.venv/<group>
 ```
 
 Then cd into any repo and run make as usual:
 
 ```bash
-cd common
-make install-dev        # Detects ~/.venv/shared, installs there
+cd dp-common
+make install-dev        # Detects ~/.venv/dp, installs there
 
-cd ../my-project
+cd ../dp-cull-record
 make install-dev        # Same shared venv
-make test               # Uses ~/.venv/shared automatically
+make test               # Uses ~/.venv/dp automatically
 ```
 
-The auto-detection uses `$(wildcard $(HOME)/.venv/shared/bin/python)` in each Makefile. If the shared venv does not exist (CI, new machine), it falls back to a local `.venv`.
+The auto-detection uses `$(wildcard $(HOME)/.venv/<group>/bin/python)` in each Makefile. If the shared venv does not exist (CI, new machine), it falls back to a local `.venv`.
 
 The `install-no-deps` target is still available for cases where you need to install a package without pulling its dependencies from the network.
 
@@ -66,17 +66,17 @@ Copy [templates/Makefile](templates/Makefile) to your project and replace `<name
 HOME_DIR := $(subst \,/,$(HOME))
 
 ifeq ($(OS),Windows_NT)
-    VENV_DIR ?= $(if $(wildcard $(HOME_DIR)/.venv/shared/Scripts/python.exe),$(HOME_DIR)/.venv/shared,.venv)
+    VENV_DIR ?= $(if $(wildcard $(HOME_DIR)/.venv/<group>/Scripts/python.exe),$(HOME_DIR)/.venv/<group>,.venv)
     PYTHON := $(VENV_DIR)/Scripts/python.exe
 else
-    VENV_DIR ?= $(if $(wildcard $(HOME_DIR)/.venv/shared/bin/python),$(HOME_DIR)/.venv/shared,.venv)
+    VENV_DIR ?= $(if $(wildcard $(HOME_DIR)/.venv/<group>/bin/python),$(HOME_DIR)/.venv/<group>,.venv)
     PYTHON := $(VENV_DIR)/bin/python
 endif
 ```
 
 `HOME_DIR` normalizes backslashes to forward slashes so paths work in both Windows shells and Unix.
 
-- **Shared venv exists**: `VENV_DIR` resolves to `~/.venv/shared`
+- **Shared venv exists**: `VENV_DIR` resolves to `~/.venv/<group>`
 - **No shared venv**: `VENV_DIR` resolves to `.venv` (local)
 - **Override**: `make VENV_DIR=.venv test` always works
 

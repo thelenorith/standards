@@ -1,6 +1,6 @@
 # Common Library Usage
 
-All projects must use constants and utilities from a shared common library rather than redefining them locally.
+When a project group has a shared common library, all projects in that group must use its constants and utilities rather than redefining them locally. If no shared library exists, local definitions are expected.
 
 ## Rationale
 
@@ -11,7 +11,7 @@ All projects must use constants and utilities from a shared common library rathe
 
 ## Required Dependency
 
-Every project (except the common library itself) must include the common library as a dependency:
+When a common library exists, every project in the group (except the common library itself) must include it as a dependency:
 
 ```toml
 # pyproject.toml
