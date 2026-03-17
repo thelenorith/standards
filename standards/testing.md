@@ -232,6 +232,49 @@ def test_copy_file(tmp_path):
     assert dest.exists()
 ```
 
+### Filesystem Sandbox (conftest.py)
+
+Test isolation is **enforced programmatically** through the standard `conftest.py`, not just by developer discipline. Every ap-* project **must** use the [conftest.py template](templates/conftest.py) which provides an autouse sandbox fixture.
+
+**What the sandbox blocks:**
+
+| Operation | Blocked Outside tmp_path |
+|-----------|--------------------------|
+| `builtins.open()` (write modes) | Yes |
+| `pathlib.Path.write_text/write_bytes` | Yes |
+| `pathlib.Path.mkdir/unlink/rmdir` | Yes |
+| `os.remove/unlink/rename/makedirs` | Yes |
+| `shutil.copy/copy2/move/rmtree` | Yes |
+| `builtins.open()` (read mode) | Blocked outside tmp_path and project root |
+| `pathlib.Path.read_text/read_bytes` | Blocked outside tmp_path and project root |
+
+**Fail-closed design:** If the sandbox cannot activate (e.g., monkeypatch fails), the test **fails immediately** rather than running without protection. This prevents silent safety regressions.
+
+```python
+# The sandbox self-tests on activation. If this fails, the test aborts:
+# "FAIL-CLOSED: Filesystem sandbox failed to activate"
+```
+
+**Bypass resistance:** The sandbox resolves symlinks and `..` traversal via `os.path.realpath()`, preventing escape attempts.
+
+### Testing the Sandbox Itself
+
+Every ap-* project **must** include [test_conftest.py](templates/test_conftest.py) to verify the sandbox works:
+
+1. **Write blocking** — Every guarded operation raises `PermissionError` outside `tmp_path`
+2. **Read blocking** — Reads outside `tmp_path` and project root are blocked
+3. **Allowed operations** — Operations inside `tmp_path` work normally
+4. **Fail-closed verification** — Sandbox reports itself as active; guarded functions are installed
+5. **Bypass resistance** — Symlinks and `..` traversal cannot escape the sandbox
+6. **Error message quality** — `PermissionError` messages include the blocked path and mention "Sandbox"
+
+```bash
+# Run sandbox tests specifically
+pytest tests/test_conftest.py -v
+```
+
+If any sandbox test fails, **do not skip or disable it**. A failing sandbox test means your test suite may be modifying the real filesystem.
+
 ## Test Data (Fixtures)
 
 **DO NOT USE GIT LFS**
